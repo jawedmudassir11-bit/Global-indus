@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   
-  <!-- PWA & Add to Home Screen Capabilities -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Global Ind">
@@ -14,22 +13,14 @@
   
   <link rel="manifest" href='data:application/manifest+json,{"name":"Global Industries Portal","short_name":"GlobalInd","display":"standalone","background_color":"#F0F4F8","theme_color":"#102A43","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzEwMkE0MyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZmlsbD0iI0ZGRkZGRiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjIwIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R0k8L3RleHQ+PC9zdmc+","sizes":"192x192","type":"image/svg+xml"}]}'>
 
-  <!-- Firebase SDKs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.1/firebase-app-compat.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.1/firebase-database-compat.min.js"></script>
-  
-  <!-- Export & PDF Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-  <!-- Cinematic Intro Libraries (Three.js & GSAP) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <style>
-    /* =========================================
-       THEMES, VARIABLES & NEW TRANSITIONS
-       ========================================= */
     :root {
       --primary: #102A43; --primary-light: #1F4E78; --secondary: #2D68C4;
       --accent: #FFD700; --bg: #F0F4F8; --card-bg: #FFFFFF;
@@ -48,38 +39,23 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     
-    /* 6767 EASTER EGG BARREL ROLL */
     body.barrel-roll { animation: googleBarrelRoll 2s var(--spring) forwards; overflow: hidden; }
-    @keyframes googleBarrelRoll {
-      0% { transform: rotate(0deg) scale(1); }
-      50% { transform: rotate(180deg) scale(0.6); }
-      100% { transform: rotate(360deg) scale(1); }
-    }
-
+    @keyframes googleBarrelRoll { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(0.6); } 100% { transform: rotate(360deg) scale(1); } }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; }
 
-    /* WATERFALL & SPRING ANIMATIONS */
-    @keyframes springIn { 
-      0% { transform: scale(0.5); opacity: 0; } 
-      60% { transform: scale(1.05); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; } 
-    }
+    @keyframes springIn { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
     @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulseWarning { 0% { transform: scale(1); } 50% { transform: scale(1.08); background: var(--danger); box-shadow: 0 0 15px var(--danger);} 100% { transform: scale(1); } }
     
-    /* 3D INTRO OVERLAY WITH STATIC HTML LOGO */
     #intro-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999999; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; cursor: crosshair; }
     #intro-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-    
     .intro-logo-wrapper { position: relative; z-index: 2; display: flex; align-items: center; gap: 25px; animation: springIn 1.5s var(--spring); pointer-events: none; }
     .intro-svg { width: 180px; height: 180px; filter: drop-shadow(0 0 15px rgba(166,123,91,0.6)); }
     .intro-text-group { display: flex; align-items: baseline; gap: 15px; }
     .intro-global { font-family: "Brush Script MT", "Comic Sans MS", cursive; color: #4CAF50; font-size: 110px; line-height: 1; text-shadow: 0 4px 15px rgba(76,175,80,0.5); }
     .intro-industries { font-family: "Times New Roman", Times, serif; color: #6da35e; font-size: 70px; letter-spacing: 1px; }
-    
     .enter-instruction { position: relative; z-index: 2; margin-top: 60px; font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 4px; animation: pulseWarning 2s infinite; pointer-events: none; background: rgba(0,0,0,0.5); padding: 12px 24px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.2);}
 
-    /* MODALS */
     .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); transition: 0.3s;}
     .modal-box-center { background: var(--card-bg); padding: 30px 24px; border-radius: 24px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position: relative; animation: springIn 0.5s var(--spring); }
     .close-btn { position: absolute; top: 14px; right: 18px; background: rgba(0,0,0,0.05); border-radius: 50%; width: 34px; height: 34px; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer; transition: 0.3s var(--spring); display: flex; align-items: center; justify-content: center; }
@@ -89,7 +65,6 @@
     .pin-input { width: 100%; padding: 18px; font-size: 24px; text-align: center; letter-spacing: 12px; border: 2px solid var(--border); border-radius: 14px; margin-bottom: 16px; background: var(--bg); color: var(--text); outline: none; font-weight: 900; transition: 0.3s var(--spring); }
     .pin-input:focus { border-color: var(--secondary); box-shadow: 0 8px 20px rgba(45,104,196,0.15); transform: translateY(-3px); }
 
-    /* HEADER */
     header { background: var(--card-bg); box-shadow: 0 4px 20px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
     .letterhead-container { padding: 16px 20px; border-bottom: 4px solid #8B5A2B; display: flex; flex-direction: column; gap: 8px; }
     .letterhead-top { display: flex; align-items: center; justify-content: flex-start; gap: 16px; }
@@ -103,21 +78,15 @@
     [data-theme="dark"] .app-control-bar { background: linear-gradient(135deg, #020617 0%, #0F172A 100%); }
     .site-selector-wrap { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 280px; position: relative; }
     .site-label { color: #FFD700; font-weight: 800; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase; }
-    
     .custom-select { background: #FFFFFF; border: none; padding: 10px 18px; border-radius: 20px; font-size: 14px; font-weight: 800; color: #102A43; width: 100%; max-width: 380px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.3s var(--spring); }
     .custom-select:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
-    .custom-dropdown-menu { position: absolute; top: 50px; left: 45px; background: var(--card-bg); width: 100%; max-width: 380px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); z-index: 200; display: none; border: 1px solid var(--border); animation: popIn 0.3s var(--spring); max-height: 450px; overflow-y: auto;}
+    .custom-dropdown-menu { position: absolute; top: 50px; left: 45px; background: var(--card-bg); width: 100%; max-width: 380px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); z-index: 200; display: none; border: 1px solid var(--border); max-height: 450px; overflow-y: auto;}
     .custom-dropdown-menu.active { display: block; }
 
     .dropdown-site-header { background: var(--bg); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--border); }
     .site-title-text { font-size: 14px; font-weight: 900; color: var(--primary); text-transform: uppercase; display: flex; align-items: center; gap: 8px;}
     .dropdown-zone-item { padding: 12px 16px 12px 40px; font-size: 14px; font-weight: 700; color: var(--text); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: relative; cursor: pointer; transition: 0.2s; background: var(--card-bg); }
     .dropdown-zone-item:hover { background: rgba(45, 104, 196, 0.08); padding-left: 48px; color: var(--secondary); }
-    .dropdown-zone-item::before { content: ''; position: absolute; left: 22px; top: 0; height: 100%; width: 2px; background: var(--border); transition: 0.2s;}
-    .dropdown-zone-item::after { content: ''; position: absolute; left: 22px; top: 50%; width: 12px; height: 2px; background: var(--border); transition: 0.2s;}
-    .dropdown-zone-item.last-zone::before { height: 50%; }
-    .dropdown-zone-item:hover::before, .dropdown-zone-item:hover::after { background: var(--secondary); }
-
     .action-btn-sm { opacity: 0.7; transition: 0.3s var(--spring); font-size: 13px; padding: 6px; display: inline-flex; align-items: center; justify-content: center; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); cursor: pointer; }
     .action-btn-sm:hover { opacity: 1; transform: scale(1.15) translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); border-color: var(--secondary); }
     .add-zone-btn { color: var(--success); cursor: pointer; background: rgba(16, 185, 129, 0.1); padding: 8px 14px; border-radius: 12px; font-size: 11px; font-weight: 900; transition: 0.3s var(--spring); text-transform: uppercase;}
@@ -133,7 +102,6 @@
     #auth-status-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
     .shake-error { animation: pulseWarning 0.4s ease; }
 
-    /* DASHBOARD & TABS */
     .container { width: 100%; padding: 24px; flex: 1; max-width: 1600px; margin: 0 auto; }
     .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 24px; }
     .stat-card { background: var(--card-bg); padding: 22px; border-radius: 20px; box-shadow: var(--shadow); border-left: 6px solid var(--secondary); display: flex; flex-direction: column; transition: 0.4s var(--spring); opacity: 0; }
@@ -164,16 +132,13 @@
     .btn-primary { background: linear-gradient(135deg, var(--secondary), #3B82F6); color: white; }
     .btn-success { background: linear-gradient(135deg, #10B981, #059669); color: white; }
     .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); box-shadow: none;}
-    .btn-outline:hover { background: var(--bg); border-color: var(--text-muted);}
     .btn-danger { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; }
     .btn-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); color: white; }
     .btn-small { padding: 10px 14px; font-size: 13px; border-radius: 12px;}
 
-    /* LIQUID TAB TRANSITIONS */
     .tab-content { display: none; }
     .tab-content.active { display: block; animation: slideUpFade 0.5s var(--spring) forwards; }
 
-    /* SEARCH BAR & WORKER CARDS */
     .search-filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
     .search-input-box { flex: 2; min-width: 220px; position: relative; }
     .search-input-box input { padding-left: 42px; }
@@ -200,7 +165,6 @@
     .duty-opt.locked { opacity: 0.6; cursor: not-allowed; position: relative; overflow: hidden; transform: none !important; box-shadow: none !important;}
     .duty-opt.locked::after { content: '🔒'; position: absolute; right: 6px; top: 6px; font-size: 11px; }
 
-    .input-row { display: flex; gap: 14px; margin-top: 6px; }
     .input-box { flex: 1; background: var(--bg); padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
     .input-box span { font-size: 13px; font-weight: 800; color: var(--text-muted); }
     .input-box input { width: 70px; padding: 8px; font-size: 15px; text-align: right; background: var(--card-bg); border: 2px solid var(--border); border-radius: 8px; font-weight: 900; color: var(--text); }
@@ -213,7 +177,6 @@
     .empty-state { text-align: center; padding: 60px 20px; background: var(--card-bg); border-radius: 20px; color: var(--text-muted); border: 2px dashed var(--border); font-weight: 800; font-size: 16px; line-height: 1.5;}
     #toast { position: fixed; bottom: -80px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 16px 32px; border-radius: 30px; font-weight: 900; font-size: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transition: bottom 0.5s var(--spring); z-index: 99999; }
     
-    /* TABLES */
     .table-container { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); overflow-x: auto; border: 1px solid var(--border); -webkit-overflow-scrolling: touch;}
     table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; color: var(--text); }
     th, td { border: 1px solid var(--border); padding: 14px 10px; text-align: center; }
@@ -221,7 +184,6 @@
     .sticky-col { position: sticky; left: 0; background: var(--card-bg); z-index: 10; border-right: 3px solid var(--border); }
     th.sticky-col { background: var(--primary-light); z-index: 20; }
 
-    /* ADVANCED LIVE ACTIVITY PANEL STYLES */
     .activity-panel { position: fixed; top: 0; right: -550px; width: 100%; max-width: 500px; height: 100vh; background: var(--card-bg); box-shadow: -5px 0 20px rgba(0,0,0,0.15); z-index: 10000; display: flex; flex-direction: column; transition: 0.4s var(--spring); border-left: 1px solid var(--border); backdrop-filter: blur(10px);}
     .activity-panel.open { right: 0; }
     .activity-header { padding: 24px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -242,11 +204,8 @@
 </head>
 <body>
 
-  <!-- THE 3D CINEMATIC INTRO CONTAINER -->
   <div id="intro-container">
     <canvas id="intro-canvas"></canvas>
-    
-    <!-- STATIC HTML LOGO OVERLAY (Bypasses all CORS and image loading bugs) -->
     <div class="intro-logo-wrapper">
       <div class="intro-svg">
         <svg viewBox="0 0 100 100" width="100%" height="100%">
@@ -259,7 +218,6 @@
           <ellipse cx="50" cy="50" rx="18" ry="45" stroke="url(#globeGradIntro)" stroke-width="3" fill="none" />
           <line x1="6" y1="50" x2="94" y2="50" stroke="url(#globeGradIntro)" stroke-width="3" />
           <rect x="-2" y="36" width="104" height="28" fill="url(#globeGradIntro)" rx="3" />
-          <!-- The text is flipped to match your reference image -->
           <text x="50" y="56" fill="#FFFFFF" font-family="'Arial Black', sans-serif" font-size="20" font-weight="900" letter-spacing="3" text-anchor="middle" transform="scale(-1, 1) translate(-100, 0)">GI</text>
         </svg>
       </div>
@@ -268,16 +226,13 @@
         <span class="intro-industries">Industries</span>
       </div>
     </div>
-    
     <div class="enter-instruction" id="enter-portal-btn">Click Anywhere To Initialize</div>
   </div>
 
   <div id="main-app">
-  <!-- SINGLE TAB LOCK SCRIPT -->
   <script>
     const sessionChannel = new BroadcastChannel('gi_session_lock');
     const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    
     sessionChannel.postMessage({ type: 'CHECK_ACTIVE' });
     sessionChannel.onmessage = (event) => {
       if (event.data.type === 'CHECK_ACTIVE') {
@@ -286,21 +241,18 @@
         document.getElementById('main-app').innerHTML = `
           <div style="display:flex; height:100vh; width:100vw; align-items:center; justify-content:center; flex-direction:column; background:var(--bg); color:var(--text); text-align:center; padding: 20px;">
             <h1 style="color:var(--danger); margin-bottom:10px; font-size:40px;">⚠️ Access Blocked</h1>
-            <p style="font-weight:700; max-width:450px; line-height:1.6;">The portal is already open in another tab or window. Using multiple tabs simultaneously corrupts the live database. Please close this tab and return to your active session.</p>
-          </div>
-        `;
+            <p style="font-weight:700; max-width:450px; line-height:1.6;">The portal is already open in another tab or window. Please close this tab.</p>
+          </div>`;
       }
     };
   </script>
 
   <div id="toast"><span id="toast-msg">System Ready</span></div>
 
-  <!-- CONFLICT DETECTOR OVERLAY -->
   <div id="conflict-overlay" class="overlay" style="z-index: 100000;">
     <div class="modal-box-center" style="border-top: 6px solid var(--danger);">
       <h2>⚠️ Sync Conflict Detected</h2>
       <p style="color: var(--danger); font-weight: bold;">Another user just modified this group while you were working.</p>
-      <p style="font-size:12px;">If you force save, you will overwrite their changes. If you reload, you will lose your recent unsaved edits.</p>
       <div style="display: flex; gap: 10px; margin-top: 15px;">
         <button class="btn btn-outline" style="flex:1;" onclick="resolveConflict('reload')">🔄 Reload Cloud Data</button>
         <button class="btn btn-danger" style="flex:1;" onclick="resolveConflict('force')">⚠️ Force Override</button>
@@ -308,14 +260,12 @@
     </div>
   </div>
 
-  <!-- ADVANCED LIVE ACTIVITY PANEL -->
   <div id="activity-panel" class="activity-panel">
     <div class="activity-header">
       <h3 style="font-size: 18px;">Live Portal Analytics</h3>
       <button style="background:none; border:none; color:white; font-size: 28px; cursor:pointer;" onclick="toggleActivityPanel()">&times;</button>
     </div>
     <div class="activity-body">
-      
       <h4 class="ana-heading">System Diagnostics</h4>
       <div class="ana-grid">
          <div class="ana-box"><span>Ping</span><b id="ana-ping">--</b></div>
@@ -328,7 +278,6 @@
          <div class="ana-box"><span>Payload</span><b id="ana-payload">0 KB</b></div>
          <div class="ana-box"><span>Database</span><b class="text-success">Connected</b></div>
       </div>
-
       <h4 class="ana-heading">Site Operations</h4>
       <div class="ana-grid">
          <div class="ana-box"><span>Active Groups</span><b id="ana-zones">0</b></div>
@@ -338,7 +287,6 @@
          <div class="ana-box"><span>Rain Days</span><b id="ana-rain">0</b></div>
          <div class="ana-box"><span>Mat. Activity</span><b id="ana-mat">0</b></div>
       </div>
-
       <h4 class="ana-heading">Financial Overview (Monthly)</h4>
       <div class="ana-grid">
          <div class="ana-box"><span>Gross Wage</span><b id="ana-gross">₹0</b></div>
@@ -348,7 +296,6 @@
       <div class="ana-box" style="margin-top: 10px; background: #FFFBEB; border-color: #FCD34D;">
          <span>Net Burn / Total Payable</span><b id="ana-net" style="color: #B45309; font-size: 20px;">₹0</b>
       </div>
-
       <h4 class="ana-heading">Network Presence</h4>
       <div class="ana-grid" style="grid-template-columns: 1fr 1fr;">
          <div class="ana-box"><span>Active Sessions</span><b id="ana-sessions">1</b></div>
@@ -357,14 +304,12 @@
          <div class="ana-box"><span>Desktop Div.</span><b id="ana-desktop">0%</b></div>
       </div>
       <div id="online-users-list" style="margin: 12px 0 20px 0;"></div>
-
       <h4 class="ana-heading">Audit Log</h4>
       <div class="ana-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:12px;">
          <div class="ana-box"><span>Today's Logs</span><b id="ana-logs">0</b></div>
          <div class="ana-box"><span>Admin Actions</span><b id="ana-admin-logs">0</b></div>
       </div>
       <div id="activity-log-list"></div>
-
     </div>
   </div>
 
@@ -392,7 +337,6 @@
     <div class="modal-box-center">
       <button class="close-btn" onclick="closeModal('site-manager-modal')">&times;</button>
       <h2 id="sm-title">Manage Structure</h2>
-      <p id="sm-desc">A Site is a major geographical location. A Group is a subgroup within that site.</p>
       <input type="hidden" id="sm-action-type">
       <input type="text" id="sm-input" class="pin-input" style="letter-spacing: normal; font-size: 18px;" placeholder="Enter Name...">
       <button class="btn btn-primary" onclick="executeSiteManager()">Save Changes</button>
@@ -435,29 +379,15 @@
       </div>
     </div>
   </header>
-<div class="container">
-    
-    <!-- DASHBOARD GRID -->
+  
+  <div class="container">
     <div class="dashboard-grid">
-      <div class="stat-card">
-        <span class="stat-label">👷 Workers</span>
-        <span class="stat-value" id="stat-total-workers">0</span>
-      </div>
-      <div class="stat-card success">
-        <span class="stat-label" id="lbl-present-today">✅ Present</span>
-        <span class="stat-value" id="stat-present-today">0 / 0</span>
-      </div>
-      <div class="stat-card warning">
-        <span class="stat-label">⏱️ Overtime</span>
-        <span class="stat-value" id="stat-total-ot">0 hrs</span>
-      </div>
-      <div class="stat-card accent">
-        <span class="stat-label">💰 Payable</span>
-        <span class="stat-value" id="stat-total-balance">₹0</span>
-      </div>
+      <div class="stat-card"><span class="stat-label">👷 Workers</span><span class="stat-value" id="stat-total-workers">0</span></div>
+      <div class="stat-card success"><span class="stat-label" id="lbl-present-today">✅ Present</span><span class="stat-value" id="stat-present-today">0 / 0</span></div>
+      <div class="stat-card warning"><span class="stat-label">⏱️ Overtime</span><span class="stat-value" id="stat-total-ot">0 hrs</span></div>
+      <div class="stat-card accent"><span class="stat-label">💰 Payable</span><span class="stat-value" id="stat-total-balance">₹0</span></div>
     </div>
 
-    <!-- NAVIGATION TABS -->
     <div class="nav-tabs">
       <button class="tab-btn active" onclick="switchTab('daily-view', this)">📅 Daily</button>
       <button class="tab-btn special-tab" onclick="switchTab('key-person-view', this)">👔 Officials</button>
@@ -469,70 +399,57 @@
       <button class="tab-btn report-tab" onclick="switchTab('report-view', this)">📈 Custom Report</button>
     </div>
 
-    <!-- TOOLBAR & DATE CONTROLS -->
     <div class="toolbar">
       <div style="display:flex; gap:14px; flex-wrap:wrap;">
         <select id="month-select" onchange="changeMonth()" style="flex:1; min-width: 150px;"></select>
         <div id="daily-date-picker-wrap" style="flex:1; min-width: 150px;"><select id="day-select" onchange="handleDayChange()"></select></div>
       </div>
-      
       <div id="edit-controls" style="display:none; gap:14px; margin-top:14px; flex-wrap:wrap;">
         <button class="btn btn-outline" onclick="openAddWorkerModal('worker')" style="color:var(--secondary); border-color:var(--secondary); flex:1;" id="btn-add-worker">➕ Add Worker</button>
         <button class="btn btn-outline special-tab" onclick="openAddWorkerModal('key_person')" style="flex:1;" id="btn-add-kp">➕ Add Key Person</button>
         <button class="btn btn-outline" onclick="forceSyncProcess()" style="flex:1;">🔄 Sync Cloud</button>
-        <button class="btn btn-danger" onclick="wipeZoneData()" style="flex:1; display:none;" id="btn-clear-group" title="Deletes all workers in this group">🗑 Clear Group Data</button>
+        <button class="btn btn-danger" onclick="wipeZoneData()" style="flex:1; display:none;" id="btn-clear-group">🗑 Clear Group Data</button>
       </div>
-
       <div style="display:flex; gap:14px; margin-top:14px; flex-wrap:wrap;">
          <button class="btn btn-success" style="flex:1;" onclick="exportToExcel()">📊 Export Excel (.xlsx)</button>
          <button class="btn btn-primary" style="flex:1;" onclick="exportDatabase()">💾 Backup DB</button>
       </div>
     </div>
 
-    <!-- TAB 1: DAILY VIEW -->
     <div id="daily-view" class="tab-content active">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
          <h3 style="color:var(--primary); font-size:20px;">Labour Attendance</h3>
       </div>
-      
       <div id="rollup-alert-daily" class="empty-state" style="display:none; background:#F0FDF4; border-color:#86EFAC; color:#166534; padding: 12px; margin-bottom: 16px;">
-        🌍 <b>Master Roll-Up View Active:</b> Viewing combined attendance across this site. Editing disabled in master view.
+        🌍 <b>Master Roll-Up View Active:</b> Viewing combined attendance across this site. Editing disabled.
       </div>
-
       <div class="search-filter-bar">
         <div class="search-input-box">
           <span class="search-icon">🔍</span>
           <input type="text" id="worker-search-input" placeholder="Search worker name or trade..." oninput="renderDailyView()">
         </div>
-        <button class="quick-action-btn" id="btn-mark-all" onclick="markAllWorkersPresent()" style="padding: 14px 20px; border-radius: 12px; border: none; background: #DCFCE7; color: #166534; font-weight: 800; cursor: pointer;">✅ Mark All Present</button>
+        <button class="btn btn-success" id="btn-mark-all" onclick="markAllWorkersPresent()" style="width:auto;">✅ Mark All Present</button>
       </div>
-
       <div class="worker-daily-list" id="daily-list-container"></div>
     </div>
 
-    <!-- TAB 2: KEY PERSON VIEW -->
     <div id="key-person-view" class="tab-content">
       <h3 style="color:#B45309; font-size:20px; margin-bottom:16px;">Officials & Key Personnel</h3>
-      
       <div id="kp-alert" class="empty-state" style="display:none; background:#FFFBEB; border-color:#FCD34D; color:#92400E;">
         Key Personnel attendance is centralized. Please select the <b>Master Roll-Up</b> (Main Site) in the dropdown to view officials.
       </div>
-      
       <div id="kp-master-header" style="display:none; text-align:center; padding: 15px; background: #FEF9C3; border-radius: 12px; margin-bottom: 20px; border: 1px solid #FDE047;">
          <h2 style="color: #92400E; margin-bottom: 5px;">⭐ Site Command Center ⭐</h2>
          <p style="color: #B45309; font-size: 13px; font-weight: 700;">Executive Officials & Supervisors</p>
       </div>
-
       <div class="worker-daily-list" id="kp-list-container"></div>
     </div>
 
-    <!-- TAB 3: DPR & INVENTORY VIEW -->
     <div id="dpr-view" class="tab-content">
       <div style="display:flex; justify-content:space-between; margin-bottom: 16px; align-items:center; flex-wrap:wrap; gap:10px;">
-         <h3 style="color:var(--primary); font-size:20px;">Daily Progress Report & Inventory</h3>
+         <h3 style="color:var(--primary); font-size:20px;">Daily Progress Report</h3>
          <button class="btn btn-whatsapp btn-small" onclick="shareDPRWhatsApp()" style="width:auto; border-radius:20px;">📲 Share WhatsApp</button>
       </div>
-      
       <div class="dpr-section">
         <h4>Site Weather & Rain Logs</h4>
         <div style="display:flex; gap:16px; margin-bottom:16px;">
@@ -546,47 +463,37 @@
            <div style="flex:1;"><label style="font-size:12px; font-weight:800;">Work Stopped?</label><select id="dpr-work-stopped" onchange="autoSaveDPR()" style="margin-top:6px;"><option>No</option><option>Yes</option></select></div>
         </div>
       </div>
-
       <div class="dpr-section">
         <h4>Work Allocation</h4>
         <textarea id="dpr-work-text" class="dpr-textarea" placeholder="E.g. Column casting at Platform 1..." onblur="autoSaveDPR()" onclick="requireAuthClick(this)"></textarea>
       </div>
-      
       <div class="dpr-section">
         <h4>📥 Materials Received <button class="btn btn-outline btn-small" onclick="addMaterialRow('received')" id="btn-add-mat-rec">+ Add</button></h4>
         <div id="dpr-mat-received-list"></div>
       </div>
-
       <div class="dpr-section">
         <h4>📤 Materials Consumed <button class="btn btn-outline btn-small" onclick="addMaterialRow('consumed')" id="btn-add-mat-con">+ Add</button></h4>
         <div id="dpr-mat-consumed-list"></div>
       </div>
-
       <div class="dpr-section" style="background:var(--bg); border: 2px dashed var(--border);">
         <h4>📦 Real-Time Live Stock at Site</h4>
-        <div id="live-stock-summary" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-          <span style="color:var(--text-muted); font-size:13px; font-style:italic;">Add received and consumed materials above to calculate live balance stock.</span>
-        </div>
+        <div id="live-stock-summary" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;"></div>
       </div>
     </div>
 
-    <!-- TAB 4: TIMELINE NOTES VIEW -->
     <div id="notes-view" class="tab-content">
       <div class="dpr-section">
          <h3 style="color:var(--primary); font-size:18px; margin-bottom: 12px;">Site Timeline & To-Do List</h3>
-         
          <div style="display:flex; gap:10px; margin-bottom: 20px;">
             <input type="text" id="timeline-input-text" placeholder="Type a note or checklist item..." style="flex:1;" onkeypress="if(event.key==='Enter') addTimelineNote()">
             <button class="btn btn-primary" onclick="addTimelineNote()" style="width:auto; padding: 12px 20px;">📌 Post</button>
          </div>
-
          <div id="timeline-feed" style="display: flex; flex-direction: column; gap: 12px; background: var(--bg); padding: 16px; border-radius: 12px; min-height: 200px; border: 1px solid var(--border);">
             <div class="empty-state">No notes added to the timeline today.</div>
          </div>
       </div>
     </div>
     
-    <!-- TAB 5: MONTHLY TABLE -->
     <div id="monthly-view" class="tab-content">
       <div id="rollup-alert-monthly" class="empty-state" style="display:none; background:#F0FDF4; border-color:#86EFAC; color:#166534; padding: 12px; margin-bottom: 16px;">
         🌍 <b>Master Roll-Up View Active:</b> Consolidated monthly attendance for all subgroups combined.
@@ -603,7 +510,6 @@
       </div>
     </div>
 
-    <!-- TAB 6: WORKER DIRECTORY -->
     <div id="worker-view" class="tab-content">
       <div id="rollup-alert-worker" class="empty-state" style="display:none; background:#F0FDF4; border-color:#86EFAC; color:#166534; padding: 12px; margin-bottom: 16px;">
         🌍 <b>Master Roll-Up View Active:</b> Viewing full workforce directory across all subgroups.
@@ -611,7 +517,6 @@
       <div class="worker-daily-list" id="worker-mgmt-body"></div>
     </div>
     
-    <!-- TAB 7: SLIPS -->
     <div id="slips-view" class="tab-content">
       <div class="dpr-section">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
@@ -630,12 +535,9 @@
       </div>
     </div>
 
-    <!-- TAB 8: NEW CUSTOM DATE-RANGE REPORT -->
     <div id="report-view" class="tab-content">
       <div class="dpr-section">
         <h3 style="color:var(--primary); font-size:20px; margin-bottom: 12px;">📈 Custom Date-Range Report</h3>
-        <p style="font-size:13px; color:var(--text-muted); margin-bottom: 20px;">Select a specific date range to aggregate all attendance, overtime, net pay, and material usage.</p>
-        
         <div style="display:flex; gap:16px; margin-bottom: 20px; flex-wrap: wrap;">
           <div style="flex:1; min-width: 200px; background: var(--bg); padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
             <label style="font-size:12px; font-weight:800; color:var(--text-muted);">From Date</label>
@@ -647,15 +549,12 @@
           </div>
         </div>
         <button class="btn btn-primary" onclick="generateCustomReport()" style="background:#9333EA; font-size: 16px; padding: 16px;">🚀 Generate Master Report</button>
-        
-        <!-- Generated Report Container -->
         <div id="report-results" style="margin-top: 24px; display: none;"></div>
       </div>
     </div>
 
   </div> <!-- End Container -->
 
-  <!-- MODAL: WORKER REGISTRATION (Expanded Trades) -->
   <div class="overlay" id="worker-modal">
     <div class="modal-box-center" style="max-width:450px;">
       <button class="close-btn" onclick="closeModal('worker-modal')">&times;</button>
@@ -667,29 +566,7 @@
       <div style="text-align:left;"><label style="font-size:12px;font-weight:bold;color:var(--text-muted)">Designation / Trade</label>
         <input type="text" id="w-desig" list="trade-suggestions" placeholder="Select or type trade..." style="margin-bottom:12px;">
         <datalist id="trade-suggestions">
-          <option value="Labor">
-          <option value="Mason">
-          <option value="Head Mason">
-          <option value="Helper">
-          <option value="Site Engineer">
-          <option value="Project Manager">
-          <option value="Bar Bender">
-          <option value="Steel Fixer">
-          <option value="Carpenter">
-          <option value="Scaffolder">
-          <option value="Electrician">
-          <option value="Plumber">
-          <option value="Welder">
-          <option value="Welder (Argon)">
-          <option value="Operator">
-          <option value="Heavy Equipment Operator">
-          <option value="Fitter">
-          <option value="Rigger">
-          <option value="Surveyor">
-          <option value="Security Guard">
-          <option value="Painter">
-          <option value="Foreman">
-          <option value="OWNER">
+          <option value="Labor"><option value="Mason"><option value="Helper"><option value="Site Engineer"><option value="Electrician"><option value="Plumber">
         </datalist>
       </div>
       <div style="display:flex; gap:12px; margin-bottom:20px;" id="wage-input-row">
@@ -700,10 +577,11 @@
     </div>
   </div>
 
-</div> <!-- END OF #main-app WRAPPER -->
+</div> 
+
 <script>
     /* =========================================
-       0. CINEMATIC 3D INTRO (REAL-TIME DAY/NIGHT EARTH & MOON)
+       0. CINEMATIC 3D INTRO
        ========================================= */
     const introContainer = document.getElementById('intro-container');
     const mainApp = document.getElementById('main-app');
@@ -715,7 +593,6 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // 1. Moving Background Stars (Warp Speed)
     const particlesCount = 3500;
     const particlesGeometry = new THREE.BufferGeometry();
     const posArray = new Float32Array(particlesCount * 3);
@@ -733,8 +610,7 @@
         
         velocityArray[i] = 0; velocityArray[i+1] = 0; velocityArray[i+2] = 0.8 + Math.random() * 2;
 
-        const rand = Math.random();
-        let c = color1;
+        const rand = Math.random(); let c = color1;
         if(rand > 0.66) c = color2; else if(rand > 0.33) c = color3;
         colorsArray[i] = c.r; colorsArray[i+1] = c.g; colorsArray[i+2] = c.b;
     }
@@ -745,50 +621,46 @@
     const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
     scene.add(particlesMesh);
 
-    // 2. REAL-TIME DAY/NIGHT LOGIC
+    // DAY/NIGHT LOGIC
     const currentHour = new Date().getHours();
-    const isDayTime = currentHour >= 6 && currentHour <= 18; // 6 AM to 6 PM is Day
-    const earthTextureFile = isDayTime ? './earth-day.jpg' : './earth-night.jpg';
+    const isDayTime = currentHour >= 6 && currentHour <= 18;
+    // THIS LINE NOW EXACTLY MATCHES YOUR FIXED GITHUB FILE NAMES
+    const earthTextureFile = isDayTime ? 'earth-day.jpg' : 'earth-night.jpg';
 
-    // 3. MASSIVE Photorealistic Earth & Moon
     const earthRadius = 30; 
     const earthGroup = new THREE.Group();
     scene.add(earthGroup);
     
     const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'Anonymous';
 
-    // Earth Mesh
     const earthGeo = new THREE.SphereGeometry(earthRadius, 128, 128); 
     const earthMat = new THREE.MeshPhongMaterial({
         map: textureLoader.load(earthTextureFile),
-        shininess: isDayTime ? 35 : 5 // Less shine at night so city lights look better
+        shininess: isDayTime ? 35 : 5 
     });
     const earth = new THREE.Mesh(earthGeo, earthMat);
     earthGroup.add(earth);
     
-    // Atmospheric Outer Glow
     const atmosGeo = new THREE.SphereGeometry(earthRadius * 1.03, 64, 64);
-    const atmosColor = isDayTime ? 0x3B82F6 : 0x1E3A8A; // Darker atmosphere at night
+    const atmosColor = isDayTime ? 0x3B82F6 : 0x1E3A8A; 
     const atmosMat = new THREE.MeshBasicMaterial({ color: atmosColor, transparent: true, opacity: 0.15, side: THREE.BackSide, blending: THREE.AdditiveBlending });
     const atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
     earthGroup.add(atmosphere);
 
-    // Moon Mesh
     const moonGeo = new THREE.SphereGeometry(4, 64, 64);
     const moonMat = new THREE.MeshPhongMaterial({
-        map: textureLoader.load('./moon.jpg'),
+        map: textureLoader.load('moon.jpg'),
         shininess: 0
     });
     const moon = new THREE.Mesh(moonGeo, moonMat);
     earthGroup.add(moon);
 
-    // Position Earth massively in the background
     earthGroup.position.set(0, -15, -80); 
     earthGroup.rotation.y = Math.PI * 0.8; 
 
-    // Scene Lighting adjusted for Day/Night
-    const ambientIntensity = isDayTime ? 0.4 : 0.8; // Higher ambient at night to see city lights
-    const directionalIntensity = isDayTime ? 1.5 : 0.2; // Lower directional sun at night
+    const ambientIntensity = isDayTime ? 0.4 : 0.8; 
+    const directionalIntensity = isDayTime ? 1.5 : 0.2; 
 
     const ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity);
     scene.add(ambientLight);
@@ -805,21 +677,18 @@
         requestAnimationFrame(animateIntro);
         time += 0.005;
         
-        // Particle Movement & Deflector Collision
         const positions = particlesMesh.geometry.attributes.position.array;
         const earthPos = earthGroup.position;
         const collisionRadiusSq = (earthRadius * 1.4) * (earthRadius * 1.4);
         
         for(let i = 0; i < particlesCount * 3; i += 3) {
             positions[i+2] += velocityArray[i+2]; 
-            
             const dx = positions[i] - earthPos.x;
             const dy = positions[i+1] - earthPos.y;
             const dz = positions[i+2] - earthPos.z;
             const distSq = dx*dx + dy*dy + dz*dz;
             
             if (distSq < collisionRadiusSq) {
-                // Push particles around the massive earth
                 positions[i] += (dx / Math.sqrt(distSq)) * 2.5;
                 positions[i+1] += (dy / Math.sqrt(distSq)) * 2.5;
             }
@@ -832,10 +701,7 @@
         }
         particlesMesh.geometry.attributes.position.needsUpdate = true;
         
-        // Spin Earth
         earthGroup.rotation.y += 0.0008;
-
-        // Orbit Moon
         moon.position.x = Math.cos(time * 0.5) * 55;
         moon.position.z = Math.sin(time * 0.5) * 55;
         moon.position.y = Math.sin(time * 0.2) * 10;
@@ -845,10 +711,8 @@
     }
     animateIntro();
 
-    // 4. Click Anywhere to Zoom to India (Patna) & Enter Portal
     introContainer.addEventListener('click', () => {
         if(!introActive) return;
-        
         const tl = gsap.timeline({
             onComplete: () => {
                 introActive = false;
@@ -859,7 +723,6 @@
             }
         });
 
-        // Rotates precisely to center India/Bihar/Patna on the massive globe and dives in
         tl.to(document.querySelector('.intro-logo-wrapper'), { opacity: 0, scale: 1.5, duration: 0.4, ease: "power2.in" })
           .to(document.querySelector('.enter-instruction'), { opacity: 0, duration: 0.3 }, "<")
           .to(earthGroup.rotation, { y: Math.PI * 1.55, x: 0.32, duration: 2.5, ease: "power3.inOut" }, "<")
@@ -925,10 +788,7 @@
           }
       });
     }
-</script>
-/* =========================================
-       CRITICAL DATA SANITIZER
-       ========================================= */
+
     function sanitizeStructure(struct) {
       if (!struct) return []; 
       let sArr = Array.isArray(struct) ? struct : Object.values(struct);
@@ -965,9 +825,6 @@
       return state;
     }
 
-    /* =========================================
-       2. PRESENCE, ROLES & AUTHENTICATION
-       ========================================= */
     function getStorageKey() { return `GI_DATA_${currentSite}_${currentSubgroup}`; }
     function showToast(m) { const t = document.getElementById('toast'); document.getElementById('toast-msg').textContent = m; t.style.bottom = '30px'; setTimeout(() => { t.style.bottom = '-80px'; }, 3000); }
     function toggleTheme() { const b = document.body; if(b.getAttribute('data-theme') === 'dark') { b.removeAttribute('data-theme'); localStorage.setItem('gi_theme', 'light'); } else { b.setAttribute('data-theme', 'dark'); localStorage.setItem('gi_theme', 'dark'); } }
@@ -1086,7 +943,6 @@
         clrGrp.style.display = 'inline-flex';
       } else if (userRole === 'incharge') {
         btn.innerHTML='🔑 Incharge'; btn.style.background='var(--warning)'; btn.classList.remove("shake-error");
-        // CHANGED: Site Incharge can now add workers!
         edits.style.display='flex'; document.getElementById('btn-add-worker').style.display='inline-flex'; document.getElementById('btn-add-kp').style.display='none';
         clrGrp.style.display = 'none';
       } else if (userRole === 'supervisor') {
@@ -1108,9 +964,6 @@
       } 
     };
 
-    /* =========================================
-       3. SITE MANAGER & CLOUD SYNC ROLLUP
-       ========================================= */
     function isUserTyping() { const el = document.activeElement; return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'); }
     window.resolveConflict = function(action) {
       document.getElementById('conflict-overlay').style.display = 'none';
@@ -1190,9 +1043,7 @@
       if(userRole !== 'admin' || isMasterRollup) return;
       if(confirm("DANGER: Wipe all data in this group?")) { appState = sanitizeState(null); saveState(); logActivity(`Wiped all data in ${currentSubgroup}`); showToast("Data Cleared"); }
     }
-/* =========================================
-       4. SITE & GROUP MANAGER 
-       ========================================= */
+
     function toggleDropdown() { document.getElementById('site-dropdown').classList.toggle('active'); }
     function loadSitesFromCloud() { db.ref('global/structure').on('value', (snap) => { siteStructure = sanitizeStructure(snap.val()); renderSiteDropdown(); }); }
 
@@ -1249,7 +1100,7 @@
     function openSiteManager(type, siteId = null) {
       if(userRole !== 'admin') return;
       document.getElementById('site-manager-modal').style.display = 'flex'; document.getElementById('sm-action-type').value = type; smTempSiteId = siteId; document.getElementById('sm-input').value = '';
-      if(type === 'site') { document.getElementById('sm-title').textContent = "Create New Site"; document.getElementById('sm-desc').textContent = "A Site represents a major geographical project location."; } 
+      if(type === 'site') { document.getElementById('sm-title').textContent = "Create New Site"; } 
       else if (type === 'group') { document.getElementById('sm-title').textContent = "Create New Group"; } 
       else if (type === 'rename') { document.getElementById('sm-title').textContent = "Rename Group"; const site = siteStructure.find(s => s.subgroups && s.subgroups.some(sub => sub.id === contextTargetId)); const sub = site.subgroups.find(s => s.id === contextTargetId); document.getElementById('sm-input').value = sub.name; }
       else if (type === 'rename_site') { document.getElementById('sm-title').textContent = "Rename Site"; const site = siteStructure.find(s => s.id === contextTargetId); document.getElementById('sm-input').value = site.name; }
@@ -1295,9 +1146,6 @@
       }
     }
 
-    /* =========================================
-       5. TABS & CALENDAR
-       ========================================= */
     function generateMonthOptions() { 
       const select = document.getElementById("month-select"); if(!select) return; select.innerHTML = ""; 
       const m = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; 
@@ -1335,9 +1183,6 @@
     
     function renderAll() { renderDailyView(); renderKeyPersonView(); renderDPRView(); renderNotesView(); renderMonthlyTable(); renderWorkerManagement(); populateSlipWorkerSelect(); updateDashboard(); }
 
-    /* =========================================
-       6. ATTENDANCE & SUPERVISOR LOCKS
-       ========================================= */
     function getInitials(name) { const n = (name||"").trim().split(" "); return n.length > 1 ? (n[0][0]+n[1][0]).toUpperCase() : (n[0] ? n[0][0].toUpperCase() : 'U'); }
     function getAttendanceMonthKey() { const monthSelect = document.getElementById("month-select"); return monthSelect ? monthSelect.value : `${new Date().getMonth()+1}-${new Date().getFullYear()}`; }
     function getWorkerAttendanceRecord(wId, sDay) {
@@ -1440,9 +1285,6 @@
       saveState(); renderDailyView(); renderMonthlyTable(); showToast("Marked all workers present!");
     }
 
-    /* =========================================
-       7. DPR & MATERIALS
-       ========================================= */
     function checkWeatherCondition() { const w = document.getElementById("dpr-weather-select").value; document.getElementById("rain-settings").style.display = w.includes('Rain') ? "flex" : "none"; autoSaveDPR(); }
 
     function renderDPRView() {
@@ -1515,9 +1357,6 @@
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
     }
 
-    /* =========================================
-       8. TIMELINE NOTES & NEW DATE-RANGE REPORT
-       ========================================= */
     function addTimelineNote() {
       if(userRole === 'viewer' || isMasterRollup) { requireAuthClick(); return; }
       const input = document.getElementById("timeline-input-text"); const text = input.value.trim();
@@ -1538,7 +1377,6 @@
       });
     }
 
-    // NEW AGGREGATED DATE-RANGE REPORT GENERATOR
     function generateCustomReport() {
         if (!currentSite) return alert("Select a site first.");
         const startDate = new Date(document.getElementById('report-start-date').value);
@@ -1620,9 +1458,6 @@
         }).catch(err => { resDiv.innerHTML = `<div class="empty-state">Error generating report.</div>`; });
     }
 
-    /* =========================================
-       9. WORKER REGISTRATION & MANAGEMENT
-       ========================================= */
     function openAddWorkerModal(type) { 
       if(userRole === 'viewer' || isMasterRollup) { showToast("Admins/Supervisors only."); return; }
       document.getElementById("edit-worker-type").value = type;
@@ -1674,9 +1509,6 @@
       });
     }
 
-    /* =========================================
-       10. MONTHLY TABLES & EXPORTS
-       ========================================= */
     function renderMonthlyTable() {
       const h1 = document.querySelector("#monthly-table thead tr:first-child"), h2 = document.getElementById("sub-headers-row"), tb = document.getElementById("monthly-table-body"), tf = document.getElementById("monthly-table-total");
       h1.innerHTML = `<th rowspan="2" class="sticky-col">NAME</th><th rowspan="2">TRADE</th>`; h2.innerHTML = "";

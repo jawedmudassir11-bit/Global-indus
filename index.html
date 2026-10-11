@@ -724,6 +724,7 @@
   </div>
 
 </div> <!-- END OF #main-app WRAPPER -->
+<script src="utils.js"></script>
 <script>
     /* =========================================
        0. CINEMATIC 3D INTRO (REAL-TIME DAY/NIGHT EARTH & MOON)
@@ -955,22 +956,6 @@
           }
       });
     }
-/* =========================================
-       CRITICAL DATA SANITIZER
-       ========================================= */
-    function sanitizeStructure(struct) {
-      if (!struct) return []; 
-      let sArr = Array.isArray(struct) ? struct : Object.values(struct);
-      sArr = sArr.filter(Boolean);
-      sArr.forEach(site => {
-        if (site.subgroups) {
-          site.subgroups = Array.isArray(site.subgroups) ? site.subgroups : Object.values(site.subgroups);
-          site.subgroups = site.subgroups.filter(Boolean);
-        } else { site.subgroups = []; }
-      });
-      return sArr;
-    }
-
     function sanitizeState(state) {
       if (!state) state = {};
       let wArr = Array.isArray(state.workers) ? state.workers : (state.workers ? Object.values(state.workers) : []);

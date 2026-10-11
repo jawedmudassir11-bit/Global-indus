@@ -937,7 +937,7 @@
       initLiveClock();
       if(localStorage.getItem('gi_theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
       if(!userName) { document.getElementById('profile-overlay').style.display = 'flex'; }
-      else { document.getElementById('profile-display').innerHTML = `👤 ${userName}`; initPresence(); }
+      else { document.getElementById('profile-display').textContent = `👤 ${userName}`; initPresence(); }
 
       generateMonthOptions(); populateDaySelector();
       loadSitesFromCloud(); loadLocalState(); syncSiteDataFirebase(); 
@@ -1005,7 +1005,7 @@
       const name = document.getElementById('profile-name-input').value.trim();
       if (!name) { alert("Please enter a valid name."); return; }
       userName = name; localStorage.setItem('gi_user_profile', name); 
-      document.getElementById('profile-overlay').style.display = 'none'; document.getElementById('profile-display').innerHTML = `👤 ${name}`; 
+      document.getElementById('profile-overlay').style.display = 'none'; document.getElementById('profile-display').textContent = `👤 ${name}`;
       initPresence(); logActivity("Joined the portal");
     }
     

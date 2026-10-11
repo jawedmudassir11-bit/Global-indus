@@ -1710,36 +1710,80 @@
     /* =========================================
        10. MONTHLY TABLES & EXPORTS
        ========================================= */
+    function buildMonthlyTableHeaders(h1, h2, currentMonthDays) {
+      h1.innerHTML = `<th rowspan="2" class="sticky-col">NAME</th><th rowspan="2">TRADE</th>`;
+      h2.innerHTML = "";
+      for (let d = 1; d <= currentMonthDays; d++) {
+        const th = document.createElement("th"); th.colSpan = 2; th.textContent = d; h1.appendChild(th);
+        h2.innerHTML += `<th class="tier2">D</th><th class="tier2">OT</th>`;
+      }
+      h1.innerHTML += `<th colspan="2" class="summary-th">TOTAL</th><th rowspan="2" class="summary-th">RATE</th><th rowspan="2" class="summary-th">AMOUNT</th><th rowspan="2" class="summary-th">ADVANCE</th><th rowspan="2" class="summary-th">BALANCE</th>`;
+      h2.innerHTML += `<th class="tier2">DUTY</th><th class="tier2">OT</th>`;
+    }
+
+    function buildMonthlyWorkerRow(w, mKey, currentMonthDays, dD, dO) {
+      let tD = 0, tO = 0, tDA = 0, c = "";
+      for (let d = 1; d <= currentMonthDays; d++) {
+        const monthAtt = appState.attendance[mKey] || {};
+        const r = (monthAtt[w.id] && monthAtt[w.id][d]) || {duty: 0, ot: 0, adv: 0};
+        tD += (r.duty || 0);
+        tO += (r.ot || 0);
+        tDA += (r.adv || 0);
+        dD[d] += (r.duty || 0);
+        dO[d] += (r.ot || 0);
+
+        const isLocked = isMasterRollup || (userRole === 'incharge' && r.locked) || (userRole === 'supervisor' && r.duty > 0);
+        const p1 = (userRole !== 'viewer' && !isLocked) ? `onblur="setDailyDuty('${w.id}', ${d}, parseFloat(this.value)||0, 'worker')"` : `readonly onclick="requireAuthClick(this)"`;
+        const p2 = (userRole !== 'viewer' && !isLocked) ? `onblur="setDailyOT('${w.id}', ${d}, this.value)"` : `readonly onclick="requireAuthClick(this)"`;
+        c += `<td><input class="tbl-input" type="text" value="${r.duty || ''}" ${p1}></td><td><input class="tbl-input" type="text" value="${r.ot || ''}" ${p2}></td>`;
+      }
+      const rt = w.rate || 0;
+      const am = (tD * rt) + (tO * (rt / 8));
+      const tAd = (appState.advances[w.id] || 0) + tDA;
+      const bl = am - tAd;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="sticky-col text-left"><b>${w.name}</b></td><td class="text-left">${w.desig}</td>${c}<td style="font-weight:bold; color:var(--primary);">${tD.toFixed(1)}</td><td style="font-weight:bold; color:var(--secondary);">${tO.toFixed(1)}</td><td class="text-right">₹${rt}</td><td class="text-right" style="font-weight:bold;">₹${am.toFixed(0)}</td><td class="text-right" style="color:var(--danger); font-weight:700;">₹${tAd.toFixed(0)}</td><td class="text-right" style="font-weight:bold; color:${bl >= 0 ? 'var(--primary)' : 'var(--danger)'}">₹${bl.toFixed(0)}</td>`;
+
+      return { tr, tD, tO, am, tAd, bl };
+    }
+
+    function buildMonthlyTableFooter(tf, currentMonthDays, dD, dO, gD, gO, gAm, gAd, gB) {
+      let dc = "";
+      for (let d = 1; d <= currentMonthDays; d++) {
+        dc += `<td>${dD[d] || '-'}</td><td>${dO[d] || '-'}</td>`;
+      }
+      tf.innerHTML = `<td colspan="2" class="sticky-col" style="text-align:center;">GRAND TOTAL</td>${dc}<td>${gD.toFixed(1)}</td><td>${gO.toFixed(1)}</td><td>-</td><td class="text-right">₹${gAm.toFixed(0)}</td><td class="text-right">₹${gAd.toFixed(0)}</td><td class="text-right" style="font-weight:800;">₹${gB.toFixed(0)}</td>`;
+    }
+
     function renderMonthlyTable() {
-      const h1 = document.querySelector("#monthly-table thead tr:first-child"), h2 = document.getElementById("sub-headers-row"), tb = document.getElementById("monthly-table-body"), tf = document.getElementById("monthly-table-total");
-      h1.innerHTML = `<th rowspan="2" class="sticky-col">NAME</th><th rowspan="2">TRADE</th>`; h2.innerHTML = "";
+      const h1 = document.querySelector("#monthly-table thead tr:first-child"),
+            h2 = document.getElementById("sub-headers-row"),
+            tb = document.getElementById("monthly-table-body"),
+            tf = document.getElementById("monthly-table-total");
       
       const mKey = getAttendanceMonthKey();
       const currentMonthDays = new Date(parseInt(mKey.split('-')[1]), parseInt(mKey.split('-')[0]), 0).getDate();
 
-      for (let d=1; d<=currentMonthDays; d++) { const th=document.createElement("th"); th.colSpan=2; th.textContent=d; h1.appendChild(th); h2.innerHTML+=`<th class="tier2">D</th><th class="tier2">OT</th>`; }
-      h1.innerHTML += `<th colspan="2" class="summary-th">TOTAL</th><th rowspan="2" class="summary-th">RATE</th><th rowspan="2" class="summary-th">AMOUNT</th><th rowspan="2" class="summary-th">ADVANCE</th><th rowspan="2" class="summary-th">BALANCE</th>`; h2.innerHTML += `<th class="tier2">DUTY</th><th class="tier2">OT</th>`;
+      buildMonthlyTableHeaders(h1, h2, currentMonthDays);
       tb.innerHTML = "";
-      if(appState.workers.length === 0) { tb.innerHTML = `<tr><td colspan="70" class="empty-state">No workers in this group.</td></tr>`; tf.innerHTML = ""; return; }
 
-      let gD=0, gO=0, gAm=0, gAd=0, gB=0; let dD=Array(currentMonthDays+1).fill(0), dO=Array(currentMonthDays+1).fill(0);
+      if(appState.workers.length === 0) {
+        tb.innerHTML = `<tr><td colspan="70" class="empty-state">No workers in this group.</td></tr>`;
+        tf.innerHTML = "";
+        return;
+      }
+
+      let gD = 0, gO = 0, gAm = 0, gAd = 0, gB = 0;
+      let dD = Array(currentMonthDays + 1).fill(0), dO = Array(currentMonthDays + 1).fill(0);
       
       appState.workers.forEach(w => {
-        let tD=0, tO=0, tDA=0, c="";
-        for (let d=1; d<=currentMonthDays; d++) {
-          const monthAtt = appState.attendance[mKey] || {};
-          const r = (monthAtt[w.id] && monthAtt[w.id][d]) || {duty:0,ot:0,adv:0}; 
-          tD+=(r.duty||0); tO+=(r.ot||0); tDA+=(r.adv||0); dD[d]+=(r.duty||0); dO[d]+=(r.ot||0);
-          const isLocked = isMasterRollup || (userRole === 'incharge' && r.locked) || (userRole === 'supervisor' && r.duty > 0); 
-          const p1 = (userRole !== 'viewer' && !isLocked) ? `onblur="setDailyDuty('${w.id}', ${d}, parseFloat(this.value)||0, 'worker')"` : `readonly onclick="requireAuthClick(this)"`;
-          const p2 = (userRole !== 'viewer' && !isLocked) ? `onblur="setDailyOT('${w.id}', ${d}, this.value)"` : `readonly onclick="requireAuthClick(this)"`;
-          c += `<td><input class="tbl-input" type="text" value="${r.duty||''}" ${p1}></td><td><input class="tbl-input" type="text" value="${r.ot||''}" ${p2}></td>`;
-        }
-        const rt=w.rate||0, am=(tD*rt)+(tO*(rt/8)), tAd=(appState.advances[w.id]||0)+tDA, bl=am-tAd; gD+=tD; gO+=tO; gAm+=am; gAd+=tAd; gB+=bl;
-        const tr = document.createElement("tr"); tr.innerHTML=`<td class="sticky-col text-left"><b>${w.name}</b></td><td class="text-left">${w.desig}</td>${c}<td style="font-weight:bold; color:var(--primary);">${tD.toFixed(1)}</td><td style="font-weight:bold; color:var(--secondary);">${tO.toFixed(1)}</td><td class="text-right">₹${rt}</td><td class="text-right" style="font-weight:bold;">₹${am.toFixed(0)}</td><td class="text-right" style="color:var(--danger); font-weight:700;">₹${tAd.toFixed(0)}</td><td class="text-right" style="font-weight:bold; color:${bl>=0?'var(--primary)':'var(--danger)'}">₹${bl.toFixed(0)}</td>`; tb.appendChild(tr);
+        const { tr, tD, tO, am, tAd, bl } = buildMonthlyWorkerRow(w, mKey, currentMonthDays, dD, dO);
+        gD += tD; gO += tO; gAm += am; gAd += tAd; gB += bl;
+        tb.appendChild(tr);
       });
-      let dc = ""; for (let d=1; d<=currentMonthDays; d++) dc += `<td>${dD[d]||'-'}</td><td>${dO[d]||'-'}</td>`;
-      tf.innerHTML = `<td colspan="2" class="sticky-col" style="text-align:center;">GRAND TOTAL</td>${dc}<td>${gD.toFixed(1)}</td><td>${gO.toFixed(1)}</td><td>-</td><td class="text-right">₹${gAm.toFixed(0)}</td><td class="text-right">₹${gAd.toFixed(0)}</td><td class="text-right" style="font-weight:800;">₹${gB.toFixed(0)}</td>`;
+
+      buildMonthlyTableFooter(tf, currentMonthDays, dD, dO, gD, gO, gAm, gAd, gB);
     }
 
     function updateDashboard() {

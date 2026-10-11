@@ -1596,10 +1596,13 @@
                 
                 if (group.attendance && group.workers) {
                     const workersObj = Array.isArray(group.workers) ? group.workers : Object.values(group.workers);
+                    const workerMap = new Map();
+                    workersObj.forEach(w => workerMap.set(String(w.id), w));
+
                     Object.entries(group.attendance).forEach(([monthKey, wData]) => {
                         const [m, y] = monthKey.split('-');
                         Object.entries(wData).forEach(([wId, days]) => {
-                            const worker = workersObj.find(w => String(w.id) === String(wId));
+                            const worker = workerMap.get(String(wId));
                             const rate = worker ? parseFloat(worker.rate) || 0 : 0;
                             
                             Object.entries(days).forEach(([day, r]) => {

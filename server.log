@@ -1,0 +1,7 @@
+127.0.0.1 - - [11/Oct/2026 11:07:04] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Oct/2026 11:07:41] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Oct/2026 11:07:43] "GET /earth-day.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [11/Oct/2026 11:07:43] "GET /moon.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [11/Oct/2026 11:08:00] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Oct/2026 11:08:00] "GET /earth-day.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [11/Oct/2026 11:08:00] "GET /moon.jpg HTTP/1.1" 200 -

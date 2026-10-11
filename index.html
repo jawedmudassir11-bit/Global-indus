@@ -1152,6 +1152,71 @@
       appState = sanitizeState(saved ? JSON.parse(saved) : null);
     }
     
+    function aggregateWorkers(aggregated, group) {
+      if (group.workers) aggregated.workers.push(...Object.values(group.workers));
+    }
+
+    function aggregateKeyPersons(aggregated, group) {
+      if (group.keyPersons) aggregated.keyPersons.push(...Object.values(group.keyPersons));
+    }
+
+    function aggregateAttendance(aggregated, group) {
+      if (group.attendance) {
+        Object.entries(group.attendance).forEach(([month, wData]) => {
+          if (!aggregated.attendance[month]) aggregated.attendance[month] = {};
+          Object.assign(aggregated.attendance[month], wData);
+        });
+      }
+    }
+
+    function aggregateKpAttendance(aggregated, group) {
+      if (group.kpAttendance) Object.assign(aggregated.kpAttendance, group.kpAttendance);
+    }
+
+    function aggregateAdvances(aggregated, group) {
+      if (group.advances) Object.assign(aggregated.advances, group.advances);
+    }
+
+    function aggregateTimeline(aggregated, group) {
+      if (group.timeline) {
+        Object.entries(group.timeline).forEach(([date, tArray]) => {
+          if (!aggregated.timeline[date]) aggregated.timeline[date] = [];
+          aggregated.timeline[date].push(...Object.values(tArray));
+        });
+      }
+    }
+
+    function aggregateDpr(aggregated, group) {
+      if (group.dpr) {
+        Object.entries(group.dpr).forEach(([date, dData]) => {
+          if (!aggregated.dpr[date]) aggregated.dpr[date] = { work: "", matReceived: [], matConsumed: [] };
+          if (dData.work) aggregated.dpr[date].work += (aggregated.dpr[date].work ? "\n---\n" : "") + dData.work;
+          if (dData.matReceived) aggregated.dpr[date].matReceived.push(...Object.values(dData.matReceived));
+          if (dData.matConsumed) aggregated.dpr[date].matConsumed.push(...Object.values(dData.matConsumed));
+        });
+      }
+    }
+
+    function processMasterRollupData(allGroups) {
+      let aggregated = { workers: [], keyPersons: [], attendance: {}, kpAttendance: {}, advances: {}, dpr: {}, timeline: {} };
+      if (allGroups) {
+        Object.values(allGroups).forEach(group => {
+          if (!group) return;
+          aggregateWorkers(aggregated, group);
+          aggregateKeyPersons(aggregated, group);
+          aggregateAttendance(aggregated, group);
+          aggregateKpAttendance(aggregated, group);
+          aggregateAdvances(aggregated, group);
+          aggregateTimeline(aggregated, group);
+          aggregateDpr(aggregated, group);
+        });
+      }
+      const uniqueKpIds = [];
+      aggregated.keyPersons = aggregated.keyPersons.filter(kp => { if (uniqueKpIds.includes(kp.id)) return false; uniqueKpIds.push(kp.id); return true; });
+      Object.keys(aggregated.timeline).forEach(date => { aggregated.timeline[date].sort((a, b) => a.timestamp - b.timestamp); });
+      return aggregated;
+    }
+
     function syncSiteDataFirebase() {
       if (currentSiteRef) { currentSiteRef.off(); }
       if (!currentSite || !currentSubgroup) { appState = sanitizeState(null); renderAll(); return; }
@@ -1160,33 +1225,7 @@
         currentSiteRef = db.ref(`data/${currentSite}`);
         currentSiteRef.on('value', (s) => {
           const allGroups = s.val();
-          let aggregated = { workers: [], keyPersons: [], attendance: {}, kpAttendance: {}, advances: {}, dpr: {}, timeline: {} };
-          if(allGroups) {
-            Object.values(allGroups).forEach(group => {
-              if(!group) return;
-              if(group.workers) aggregated.workers.push(...Object.values(group.workers));
-              if(group.keyPersons) aggregated.keyPersons.push(...Object.values(group.keyPersons));
-              if(group.attendance) Object.entries(group.attendance).forEach(([month, wData]) => {
-                if(!aggregated.attendance[month]) aggregated.attendance[month] = {};
-                Object.assign(aggregated.attendance[month], wData);
-              });
-              if(group.kpAttendance) Object.assign(aggregated.kpAttendance, group.kpAttendance);
-              if(group.advances) Object.assign(aggregated.advances, group.advances);
-              if(group.timeline) Object.entries(group.timeline).forEach(([date, tArray]) => {
-                if(!aggregated.timeline[date]) aggregated.timeline[date] = [];
-                aggregated.timeline[date].push(...Object.values(tArray));
-              });
-              if(group.dpr) Object.entries(group.dpr).forEach(([date, dData]) => {
-                if(!aggregated.dpr[date]) aggregated.dpr[date] = { work: "", matReceived: [], matConsumed: [] };
-                if(dData.work) aggregated.dpr[date].work += (aggregated.dpr[date].work ? "\n---\n" : "") + dData.work;
-                if(dData.matReceived) aggregated.dpr[date].matReceived.push(...Object.values(dData.matReceived));
-                if(dData.matConsumed) aggregated.dpr[date].matConsumed.push(...Object.values(dData.matConsumed));
-              });
-            });
-          }
-          const uniqueKpIds = [];
-          aggregated.keyPersons = aggregated.keyPersons.filter(kp => { if(uniqueKpIds.includes(kp.id)) return false; uniqueKpIds.push(kp.id); return true; });
-          Object.keys(aggregated.timeline).forEach(date => { aggregated.timeline[date].sort((a,b) => a.timestamp - b.timestamp); });
+          const aggregated = processMasterRollupData(allGroups);
           appState = sanitizeState(aggregated);
           if(!isUserTyping()) renderAll();
         });

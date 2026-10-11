@@ -947,8 +947,9 @@
         if(!e.target.closest('.site-selector-wrap')) document.getElementById('site-dropdown').classList.remove('active');
       });
 
-      document.getElementById('admin-pwd').addEventListener('input', function(e) {
-          if (this.value === '6767') {
+      document.getElementById('admin-pwd').addEventListener('input', async function(e) {
+          const hashedVal = await hashPassword(this.value);
+          if (hashedVal === 'd07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c') {
               document.body.classList.add('barrel-roll');
               this.value = ''; 
               setTimeout(() => document.body.classList.remove('barrel-roll'), 2500);
@@ -1095,11 +1096,20 @@
     function closeLoginModal() { document.getElementById('login-overlay').style.display = 'none'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     
-    function checkPassword() { 
+    async function hashPassword(pwd) {
+      const msgUint8 = new TextEncoder().encode(pwd);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashHex;
+    }
+
+    async function checkPassword() {
       const pwd = document.getElementById('admin-pwd').value;
-      if (pwd === '9431') { userRole = 'admin'; showToast("Admin Access Unlocked"); }
-      else if (pwd === '1820') { userRole = 'incharge'; showToast("Site Incharge Mode Unlocked"); }
-      else if (pwd === '5566') { userRole = 'supervisor'; showToast("Supervisor Mode Unlocked"); }
+      const hashedPwd = await hashPassword(pwd);
+      if (hashedPwd === '6a1c87b67347c741d49ad22387cee6848117c31ed02d661acd6c22ff4f2c5a32') { userRole = 'admin'; showToast("Admin Access Unlocked"); }
+      else if (hashedPwd === '6a7a1382f96c6e92e5ae50aedcbf77cc1e51c0750c363cb9bbcd4d558421b2c4') { userRole = 'incharge'; showToast("Site Incharge Mode Unlocked"); }
+      else if (hashedPwd === 'be41b7f1fa56ba2b0582910053c86cf6ee7e311efc51300220df0918bb9a287b') { userRole = 'supervisor'; showToast("Supervisor Mode Unlocked"); }
       else { document.getElementById('pwd-error').style.display = 'block'; return; }
       
       localStorage.setItem('gi_role', userRole); 

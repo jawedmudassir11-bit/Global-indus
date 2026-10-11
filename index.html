@@ -829,12 +829,8 @@
     camera.position.z = 10;
     let introActive = true;
     let time = 0;
-    
-    function animateIntro() {
-        if(!introActive) return;
-        requestAnimationFrame(animateIntro);
-        time += 0.005;
-        
+
+    function updateParticles() {
         // Particle Movement & Deflector Collision
         const positions = particlesMesh.geometry.attributes.position.array;
         const earthPos = earthGroup.position;
@@ -861,7 +857,9 @@
             }
         }
         particlesMesh.geometry.attributes.position.needsUpdate = true;
-        
+    }
+
+    function updateMeshes(time) {
         // Spin Earth
         earthGroup.rotation.y += 0.0008;
 
@@ -870,6 +868,15 @@
         moon.position.z = Math.sin(time * 0.5) * 55;
         moon.position.y = Math.sin(time * 0.2) * 10;
         moon.rotation.y += 0.002;
+    }
+
+    function animateIntro() {
+        if(!introActive) return;
+        requestAnimationFrame(animateIntro);
+        time += 0.005;
+
+        updateParticles();
+        updateMeshes(time);
 
         renderer.render(scene, camera);
     }

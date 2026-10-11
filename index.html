@@ -1571,6 +1571,79 @@
       });
     }
 
+    function fetchCustomReportData(site) {
+        return db.ref(`data/${site}`).once('value');
+    }
+
+    function processCustomReportData(allGroups, startDate, endDate) {
+        let tPresent = 0, tAbsent = 0, tOT = 0, tGross = 0, tAdv = 0;
+        let materials = {};
+
+        Object.values(allGroups).forEach(group => {
+            if (!group) return;
+
+            if (group.attendance && group.workers) {
+                const workersObj = Array.isArray(group.workers) ? group.workers : Object.values(group.workers);
+                Object.entries(group.attendance).forEach(([monthKey, wData]) => {
+                    const [m, y] = monthKey.split('-');
+                    Object.entries(wData).forEach(([wId, days]) => {
+                        const worker = workersObj.find(w => String(w.id) === String(wId));
+                        const rate = worker ? parseFloat(worker.rate) || 0 : 0;
+
+                        Object.entries(days).forEach(([day, r]) => {
+                            const recordDate = new Date(y, m - 1, day);
+                            if (recordDate >= startDate && recordDate <= endDate) {
+                                const duty = parseFloat(r.duty) || 0;
+                                const ot = parseFloat(r.ot) || 0;
+                                const adv = parseFloat(r.adv) || 0;
+
+                                if (duty > 0) tPresent += duty; else tAbsent += 1;
+                                tOT += ot; tAdv += adv;
+                                tGross += (duty * rate) + (ot * (rate / 8));
+                            }
+                        });
+                    });
+                });
+            }
+
+            if (group.dpr) {
+                Object.entries(group.dpr).forEach(([dateStr, dData]) => {
+                    const [d, m, y] = dateStr.split('-');
+                    const recordDate = new Date(y, m - 1, d);
+                    if (recordDate >= startDate && recordDate <= endDate) {
+                        if (dData.matReceived) { Object.values(dData.matReceived).forEach(mat => { const key = `[IN] ${mat.item} (${mat.unit})`; materials[key] = (materials[key] || 0) + (parseFloat(mat.qty) || 0); }); }
+                        if (dData.matConsumed) { Object.values(dData.matConsumed).forEach(mat => { const key = `[OUT] ${mat.item} (${mat.unit})`; materials[key] = (materials[key] || 0) + (parseFloat(mat.qty) || 0); }); }
+                    }
+                });
+            }
+        });
+
+        return { tPresent, tAbsent, tOT, tGross, tAdv, materials };
+    }
+
+    function renderCustomReport(resDiv, data, startDate, endDate) {
+        let matHtml = "";
+        Object.keys(data.materials).forEach(k => {
+            const color = k.includes('[IN]') ? 'var(--success)' : 'var(--danger)';
+            matHtml += `<div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid var(--border);"><span style="font-weight: 700; color: ${color};">${k}</span><span style="font-weight: 900; font-size:16px;">${data.materials[k]}</span></div>`;
+        });
+        if (!matHtml) matHtml = `<div style="padding:10px; color:var(--text-muted); font-size: 13px;">No materials logged in this timeframe.</div>`;
+
+        resDiv.innerHTML = `
+            <div style="background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; padding: 20px;">
+                <h4 style="color:var(--primary); margin-bottom: 16px; border-bottom: 2px solid var(--secondary); padding-bottom: 8px;">Master Report: ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div style="background: var(--bg); padding: 12px; border-radius: 8px;"><div style="font-size:11px; color:var(--text-muted); font-weight:800;">TOTAL PRESENT DAYS</div><div style="font-size:20px; font-weight:900; color:var(--success);">${data.tPresent.toFixed(1)}</div></div>
+                    <div style="background: var(--bg); padding: 12px; border-radius: 8px;"><div style="font-size:11px; color:var(--text-muted); font-weight:800;">TOTAL ABSENT DAYS</div><div style="font-size:20px; font-weight:900; color:var(--danger);">${data.tAbsent}</div></div>
+                    <div style="background: var(--bg); padding: 12px; border-radius: 8px;"><div style="font-size:11px; color:var(--text-muted); font-weight:800;">TOTAL OVERTIME</div><div style="font-size:20px; font-weight:900; color:var(--warning);">${data.tOT.toFixed(1)} hrs</div></div>
+                    <div style="background: var(--bg); padding: 12px; border-radius: 8px;"><div style="font-size:11px; color:var(--text-muted); font-weight:800;">NET WAGES GENERATED</div><div style="font-size:20px; font-weight:900; color:var(--primary);">₹${(data.tGross - data.tAdv).toFixed(0)}</div></div>
+                </div>
+                <h5 style="color:var(--primary); font-size:14px; margin-bottom: 10px;">Material Movement Summary</h5>
+                <div style="background: var(--bg); border-radius: 8px; border: 1px solid var(--border); padding: 8px;">${matHtml}</div>
+            </div>
+        `;
+    }
+
     // NEW AGGREGATED DATE-RANGE REPORT GENERATOR
     function generateCustomReport() {
         if (!currentSite) return alert("Select a site first.");
@@ -1584,72 +1657,12 @@
         resDiv.innerHTML = `<div style="text-align:center; padding: 20px;">Fetching global site data...</div>`;
         resDiv.style.display = 'block';
 
-        db.ref(`data/${currentSite}`).once('value').then(snap => {
+        fetchCustomReportData(currentSite).then(snap => {
             const allGroups = snap.val();
             if (!allGroups) { resDiv.innerHTML = `<div class="empty-state">No data found for this site.</div>`; return; }
 
-            let tPresent = 0, tAbsent = 0, tOT = 0, tGross = 0, tAdv = 0;
-            let materials = {};
-
-            Object.values(allGroups).forEach(group => {
-                if (!group) return;
-                
-                if (group.attendance && group.workers) {
-                    const workersObj = Array.isArray(group.workers) ? group.workers : Object.values(group.workers);
-                    Object.entries(group.attendance).forEach(([monthKey, wData]) => {
-                        const [m, y] = monthKey.split('-');
-                        Object.entries(wData).forEach(([wId, days]) => {
-                            const worker = workersObj.find(w => String(w.id) === String(wId));
-                            const rate = worker ? parseFloat(worker.rate) || 0 : 0;
-                            
-                            Object.entries(days).forEach(([day, r]) => {
-                                const recordDate = new Date(y, m - 1, day);
-                                if (recordDate >= startDate && recordDate <= endDate) {
-                                    const duty = parseFloat(r.duty) || 0;
-                                    const ot = parseFloat(r.ot) || 0;
-                                    const adv = parseFloat(r.adv) || 0;
-                                    
-                                    if (duty > 0) tPresent += duty; else tAbsent += 1;
-                                    tOT += ot; tAdv += adv;
-                                    tGross += (duty * rate) + (ot * (rate / 8));
-                                }
-                            });
-                        });
-                    });
-                }
-                
-                if (group.dpr) {
-                    Object.entries(group.dpr).forEach(([dateStr, dData]) => {
-                        const [d, m, y] = dateStr.split('-');
-                        const recordDate = new Date(y, m - 1, d);
-                        if (recordDate >= startDate && recordDate <= endDate) {
-                            if (dData.matReceived) { Object.values(dData.matReceived).forEach(mat => { const key = `[IN] ${mat.item} (${mat.unit})`; materials[key] = (materials[key] || 0) + (parseFloat(mat.qty) || 0); }); }
-                            if (dData.matConsumed) { Object.values(dData.matConsumed).forEach(mat => { const key = `[OUT] ${mat.item} (${mat.unit})`; materials[key] = (materials[key] || 0) + (parseFloat(mat.qty) || 0); }); }
-                        }
-                    });
-                }
-            });
-
-            let matHtml = "";
-            Object.keys(materials).forEach(k => {
-                const color = k.includes('[IN]') ? 'var(--success)' : 'var(--danger)';
-                matHtml += `<div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid var(--border);"><span style="font-weight: 700; color: ${color};">${k}</span><span style="font-weight: 900; font-size:16px;">${materials[k]}</span></div>`;
-            });
-            if (!matHtml) matHtml = `<div style="padding:10px; color:var(--text-muted); font-size: 13px;">No materials logged in this timeframe.</div>`;
-
-            resDiv.innerHTML = `
-                <div style="background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; padding: 20px;">
-                    <h4 style="color:var(--primary); margin-bottom: 16px; border-bottom: 2px solid var(--secondary); padding-bottom: 8px;">Master Report: ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}</h4>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                        <div style="background: var(--bg); padding: 12px; border-radius: 8px;"><div style="font-size:11px; color:var(--text-muted); font-weight:800;">TOTAL PRESENT DAYS</div><div style="font-size:20px; font-weight:900; color:var(--success);">${tPresent.toFixed(1)}</div></div>
-                        <div style="background: var(--bg); padding: 12px; border-radius: 8px;"><div style="font-size:11px; color:var(--text-muted); font-weight:800;">TOTAL ABSENT DAYS</div><div style="font-size:20px; font-weight:900; color:var(--danger);">${tAbsent}</div></div>
-                        <div style="background: var(--bg); padding: 12px; border-radius: 8px;"><div style="font-size:11px; color:var(--text-muted); font-weight:800;">TOTAL OVERTIME</div><div style="font-size:20px; font-weight:900; color:var(--warning);">${tOT.toFixed(1)} hrs</div></div>
-                        <div style="background: var(--bg); padding: 12px; border-radius: 8px;"><div style="font-size:11px; color:var(--text-muted); font-weight:800;">NET WAGES GENERATED</div><div style="font-size:20px; font-weight:900; color:var(--primary);">₹${(tGross - tAdv).toFixed(0)}</div></div>
-                    </div>
-                    <h5 style="color:var(--primary); font-size:14px; margin-bottom: 10px;">Material Movement Summary</h5>
-                    <div style="background: var(--bg); border-radius: 8px; border: 1px solid var(--border); padding: 8px;">${matHtml}</div>
-                </div>
-            `;
+            const processedData = processCustomReportData(allGroups, startDate, endDate);
+            renderCustomReport(resDiv, processedData, startDate, endDate);
         }).catch(err => { resDiv.innerHTML = `<div class="empty-state">Error generating report.</div>`; });
     }
 

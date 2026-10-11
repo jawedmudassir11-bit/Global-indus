@@ -1717,8 +1717,11 @@
       const mKey = getAttendanceMonthKey();
       const currentMonthDays = new Date(parseInt(mKey.split('-')[1]), parseInt(mKey.split('-')[0]), 0).getDate();
 
-      for (let d=1; d<=currentMonthDays; d++) { const th=document.createElement("th"); th.colSpan=2; th.textContent=d; h1.appendChild(th); h2.innerHTML+=`<th class="tier2">D</th><th class="tier2">OT</th>`; }
-      h1.innerHTML += `<th colspan="2" class="summary-th">TOTAL</th><th rowspan="2" class="summary-th">RATE</th><th rowspan="2" class="summary-th">AMOUNT</th><th rowspan="2" class="summary-th">ADVANCE</th><th rowspan="2" class="summary-th">BALANCE</th>`; h2.innerHTML += `<th class="tier2">DUTY</th><th class="tier2">OT</th>`;
+      let h2Content = "";
+      for (let d=1; d<=currentMonthDays; d++) { const th=document.createElement("th"); th.colSpan=2; th.textContent=d; h1.appendChild(th); h2Content+=`<th class="tier2">D</th><th class="tier2">OT</th>`; }
+      h1.innerHTML += `<th colspan="2" class="summary-th">TOTAL</th><th rowspan="2" class="summary-th">RATE</th><th rowspan="2" class="summary-th">AMOUNT</th><th rowspan="2" class="summary-th">ADVANCE</th><th rowspan="2" class="summary-th">BALANCE</th>`;
+      h2Content += `<th class="tier2">DUTY</th><th class="tier2">OT</th>`;
+      h2.innerHTML = h2Content;
       tb.innerHTML = "";
       if(appState.workers.length === 0) { tb.innerHTML = `<tr><td colspan="70" class="empty-state">No workers in this group.</td></tr>`; tf.innerHTML = ""; return; }
 
